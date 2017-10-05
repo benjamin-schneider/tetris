@@ -1,0 +1,19 @@
+* { box-sizing: border-box; }
+.game {
+  position: relative;
+  width: 200px;
+  height: 440px;
+}
+.grid {
+  width: 100%; 
+  height: 100%;
+  
+  .grid__element {
+    //height: 1fr;
+    border-collapse: collapse;
+    border: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
