@@ -3,6 +3,16 @@ class Array2d {
         this.a = a;
     }
 
+    static create(a) {
+        return new Array2d(a);
+    }
+
+    reset(fillWith = 0) {
+        this.a = Array(this.getRowLength())
+            .fill(fillWith)
+            .map(() => Array(this.getColLength()).fill(fillWith));
+    }
+
     has(row, col) {
         return row in this.a && col in this.a[row];
     }
@@ -37,8 +47,8 @@ class Array2d {
     }
 
     canMerge(b, row, col, bRow = 0, bCol = 0, initialRowCol = {}) {
-        if (this.has(row, col) && this.get(row, col) === 0) {
-            if (!initialRowCol.row && !initialRowCol.col) {
+        if (this.has(row, col) && (this.get(row, col) === 0 || b.get(bRow, bCol) === 0)) {
+            if ('row' in initialRowCol === false && 'col' in initialRowCol === false) {
                 Object.assign(initialRowCol, { row, col });
             }
             if (!b.hasNext(bRow, bCol)) {
@@ -56,11 +66,10 @@ class Array2d {
                 return { success: false };
             }
             if (nextB.type === 'row') {
-                const newRowInitialCol = (col + 1) - b.getColLength();
-                if (!this.has(row + 1, newRowInitialCol)) {
+                if (!this.has(row + 1, initialRowCol.col)) {
                     return { success: false };
                 }
-                next.col = newRowInitialCol;
+                next.col = initialRowCol.col;
             }        
             return this.canMerge(
                 b,
@@ -75,21 +84,63 @@ class Array2d {
     }
 
     merge(b, row, col) {
+        const startCol = col;
         let rowCounter = 0;
         let colCounter = 0;
-        while (b.hasNext(rowCounter, colCounter)) {
+        // while (b.hasNext(rowCounter, colCounter)) {
+        //     this.a[row][col] = b.get(rowCounter, colCounter);
+        //     const next = b.getNext(rowCounter, colCounter);
+        //     rowCounter = next.row;
+        //     colCounter = next.col;
+        //     if (next.type === 'row') {
+        //         row++;
+        //         col = startCol;
+        //     } else {
+        //         col++;
+        //     }
+        // }
+        do {
             this.a[row][col] = b.get(rowCounter, colCounter);
-            let next = b.getNext(rowCounter, colCounter);
+            const next = b.getNext(rowCounter, colCounter);
             rowCounter = next.row;
             colCounter = next.col;
             if (next.type === 'row') {
                 row++;
-                col = 0;
+                col = startCol;
             } else {
                 col++;
             }
-        }
-        console.log( this.a );
+        } while (b.has(rowCounter, colCounter));
+    }
+
+    unmerge(b, row, col) {
+        const startCol = col;
+        let rowCounter = 0;
+        let colCounter = 0;
+        // while (b.hasNext(rowCounter, colCounter)) {
+        //     this.a[row][col] = 0;
+        //     const next = b.getNext(rowCounter, colCounter);
+        //     rowCounter = next.row;
+        //     colCounter = next.col;
+        //     if (next.type === 'row') {
+        //         row++;
+        //         col = startCol;
+        //     } else {
+        //         col++;
+        //     }
+        // }
+        do {
+            this.a[row][col] = 0;
+            const next = b.getNext(rowCounter, colCounter);
+            rowCounter = next.row;
+            colCounter = next.col;
+            if (next.type === 'row') {
+                row++;
+                col = startCol;
+            } else {
+                col++;
+            }
+        } while (b.has(rowCounter, colCounter));
     }
 }
 

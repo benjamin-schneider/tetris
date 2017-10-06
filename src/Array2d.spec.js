@@ -2,35 +2,38 @@
 import blocks from './blocks';
 import Array2d from './Array2d';
 // npm test -- src/Array2d.spec.js
-const createGrid = (rows, cols, fillWith = 0) =>
-    Array(rows).fill(fillWith).map(() => Array(cols).fill(0));
+const createGridArray = (rows, cols, fillWith = 0) =>
+    Array(rows).fill(fillWith).map(() => Array(cols).fill(fillWith));
 
 const [rows, cols, fillWith] = [20, 10, 0];
-const grid = createGrid(rows, cols, fillWith);
-const array2d = new Array2d(grid);
-const blockT = new Array2d(blocks.T[0]);
+
+const grid = Array2d.create(createGridArray(rows, cols, fillWith));
+const viewGrid = Array2d.create(createGridArray(rows, cols, fillWith));
+const blockT = Array2d.create(blocks.T[0]);
+
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 describe('Array2d test suite', () => {
     it('should detect boundaries', () => {
-        expect(array2d.has(0, 0)).toEqual(true);
-        expect(array2d.has(rows - 1, cols - 1)).toEqual(true);
-        expect(array2d.has(rows, 0)).toEqual(false);
-        expect(array2d.has(0, cols)).toEqual(false);
+        expect(grid.has(0, 0)).toEqual(true);
+        expect(grid.has(rows - 1, cols - 1)).toEqual(true);
+        expect(grid.has(rows, 0)).toEqual(false);
+        expect(grid.has(0, cols)).toEqual(false);
     });
 
     it('should get a 2d value', () => {
-        expect(array2d.get(0, 0)).toEqual(0);
-        expect(array2d.get(rows, cols)).toBeUndefined();
+        expect(grid.get(0, 0)).toEqual(0);
+        expect(grid.get(rows, cols)).toBeUndefined();
     });
 
     it('should detect next value', () => {
-        expect(array2d.hasNext(0, 0)).toEqual(true);
-        expect(array2d.hasNext(rows - 1, cols - 1)).toBeFalsy();
+        expect(grid.hasNext(0, 0)).toEqual(true);
+        expect(grid.hasNext(rows - 1, cols - 1)).toBeFalsy();
     });
 
     it('should get next value', () => {
         const test = (row, col, response) => {
-            expect(array2d.getNext(row, col)).toEqual({
+            expect(grid.getNext(row, col)).toEqual({
                 hasNext: true,
                 value: 0,
                 ...response,
@@ -41,10 +44,10 @@ describe('Array2d test suite', () => {
         test(0, cols - 1, { row: 1, col: 0, type: 'row' });
     });
 
-    it('shoud detect if merging is possble', () => {
+    it('shoud detect if merging is possble', (done) => {
         const test = (row, col, result) => {
-            const canMargeResult = array2d.canMerge(blockT, row, col, 0, 0);
-            expect(canMargeResult.success).toEqual(result);console.dir(canMargeResult);
+            const canMergeResult = grid.canMerge(blockT, row, col);
+            expect(canMergeResult.success).toEqual(result);
         };
         test(0, 0, true);
         test(rows - blockT.getRowLength(), 0, true);
@@ -52,7 +55,46 @@ describe('Array2d test suite', () => {
         test(rows, 0, false);
         test(0, cols, false);
 
-console.log( array2d.merge(blockT, 0, 0) );
+        
+        const getRandomBlock = () => {
+            const keys = Object.keys(blocks);
+            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+            return blocks[randomKey];
+        };
+        const loop = (row, col) => {
+            const block = Array2d.create(getRandomBlock()[0]); 
+            const framesInterval = setInterval(() => {
+                const canMergeResult = grid.canMerge(block, row, col);
+                if (canMergeResult.success) {
+                    if (row > 0) {
+                        viewGrid.unmerge(block, row - 1, col);    
+                    }
+                    viewGrid.merge(block, row, col);
+                    console.log(viewGrid.a);
+                    row++;
+                } else {
+                    grid.merge(block, row - 1, col);
+                    viewGrid.merge(block, row - 1, col);
+                    console.log(grid.a);
+                    clearInterval(framesInterval); 
+                    
+                }    
+            }, 100);
+        };
 
+        setTimeout(() => loop(0, 0), 0);  
+        setTimeout(() => loop(0, 5), 2000);
+        setTimeout(() => loop(0, 2), 4000);
+
+        setTimeout(() => done(), 9000);
+        
+
+    });
+
+    it('shoud unmerge', () => {
+        grid.merge(Array2d.create(blocks.I[0]), 2, 0);
+        
+        grid.unmerge(Array2d.create(blocks.I[0]), 2, 0);
+        console.log( grid.a );
     });
 });
