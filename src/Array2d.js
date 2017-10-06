@@ -83,24 +83,12 @@ class Array2d {
         return { success: false };
     }
 
-    merge(b, row, col) {
+    * loopBlock(b, row, col) {
         const startCol = col;
         let rowCounter = 0;
         let colCounter = 0;
-        // while (b.hasNext(rowCounter, colCounter)) {
-        //     this.a[row][col] = b.get(rowCounter, colCounter);
-        //     const next = b.getNext(rowCounter, colCounter);
-        //     rowCounter = next.row;
-        //     colCounter = next.col;
-        //     if (next.type === 'row') {
-        //         row++;
-        //         col = startCol;
-        //     } else {
-        //         col++;
-        //     }
-        // }
         do {
-            this.a[row][col] = b.get(rowCounter, colCounter);
+            yield { row, col, rowCounter, colCounter, source: this };
             const next = b.getNext(rowCounter, colCounter);
             rowCounter = next.row;
             colCounter = next.col;
@@ -113,35 +101,64 @@ class Array2d {
         } while (b.has(rowCounter, colCounter));
     }
 
-    unmerge(b, row, col) {
-        const startCol = col;
-        let rowCounter = 0;
-        let colCounter = 0;
-        // while (b.hasNext(rowCounter, colCounter)) {
-        //     this.a[row][col] = 0;
-        //     const next = b.getNext(rowCounter, colCounter);
-        //     rowCounter = next.row;
-        //     colCounter = next.col;
-        //     if (next.type === 'row') {
-        //         row++;
-        //         col = startCol;
-        //     } else {
-        //         col++;
-        //     }
-        // }
-        do {
-            this.a[row][col] = 0;
-            const next = b.getNext(rowCounter, colCounter);
-            rowCounter = next.row;
-            colCounter = next.col;
-            if (next.type === 'row') {
-                row++;
-                col = startCol;
-            } else {
-                col++;
+    merge(b, row, col) {
+        const onLoop = (it) => {
+            const current = it.next();
+            if (!current.done) {
+                this.a[current.value.row][current.value.col] = b.get(current.value.rowCounter, current.value.colCounter);
+                onLoop(it);
             }
-        } while (b.has(rowCounter, colCounter));
+        }
+        onLoop(this.loopBlock(b, row, col));
     }
+
+
+    unmerge(b, row, col) {
+        const onLoop = (it) => {
+            const current = it.next();
+            if (!current.done) {
+                this.a[current.value.row][current.value.col] = 0;
+                onLoop(it);
+            }
+        }
+        onLoop(this.loopBlock(b, row, col));        
+    }
+
+    // merge(b, row, col) {
+    //     const startCol = col;
+    //     let rowCounter = 0;
+    //     let colCounter = 0;
+    //     do {
+    //         this.a[row][col] = b.get(rowCounter, colCounter);
+    //         const next = b.getNext(rowCounter, colCounter);
+    //         rowCounter = next.row;
+    //         colCounter = next.col;
+    //         if (next.type === 'row') {
+    //             row++;
+    //             col = startCol;
+    //         } else {
+    //             col++;
+    //         }
+    //     } while (b.has(rowCounter, colCounter));
+    // }
+
+    // unmerge(b, row, col) {
+    //     const startCol = col;
+    //     let rowCounter = 0;
+    //     let colCounter = 0;
+    //     do {
+    //         this.a[row][col] = 0;
+    //         const next = b.getNext(rowCounter, colCounter);
+    //         rowCounter = next.row;
+    //         colCounter = next.col;
+    //         if (next.type === 'row') {
+    //             row++;
+    //             col = startCol;
+    //         } else {
+    //             col++;
+    //         }
+    //     } while (b.has(rowCounter, colCounter));
+    // }
 }
 
 export default Array2d;

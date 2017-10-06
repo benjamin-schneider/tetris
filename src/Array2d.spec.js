@@ -91,10 +91,26 @@ describe('Array2d test suite', () => {
 
     });
 
-    it('shoud unmerge', () => {
-        grid.merge(Array2d.create(blocks.I[0]), 2, 0);
-        
-        grid.unmerge(Array2d.create(blocks.I[0]), 2, 0);
-        console.log( grid.a );
+    it('shoud merge', () => {
+        grid.merge(Array2d.create(blocks.I[0]), 0, 0);
+        expect(grid.a[0]).toEqual([1, 1, 1, 1, 0, 0, 0, 0, 0, 0]);
     });
+
+    it('shoud unmerge', () => {
+        grid.unmerge(Array2d.create(blocks.I[0]), 0, 0);
+        expect(grid.a[0]).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+        // const it = grid.loopBlock(Array2d.create(blocks.I[0]), 0, 0);
+        // console.log(it);
+        // console.log(it.next())
+        // console.log(it.next())
+        // console.log(it.next());
+        // console.log(it.next());
+        // console.log(it.next());
+        // console.log(it.next());
+        // console.log(it.next());
+        // console.log(it.next());
+        
+    });
+
 });
