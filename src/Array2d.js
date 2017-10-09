@@ -66,9 +66,11 @@ class Array2d {
                 return { success: false };
             }
             if (nextB.type === 'row') {
-                if (!this.has(row + 1, initialRowCol.col)) {
+                //console.log('INITIAL: ', initialRowCol, 'NEXT: ', next, 'NEXTB: ', nextB, this.get(next.row, initialRowCol.col));
+                if (!this.has(row + 1, initialRowCol.col) || this.get(next.row, initialRowCol.col) !== 0) {
                     return { success: false };
                 }
+                next.row = row + 1;
                 next.col = initialRowCol.col;
             }        
             return this.canMerge(
@@ -105,7 +107,10 @@ class Array2d {
         const onLoop = (it) => {
             const current = it.next();
             if (!current.done) {
-                this.a[current.value.row][current.value.col] = b.get(current.value.rowCounter, current.value.colCounter);
+                const bValue = b.get(current.value.rowCounter, current.value.colCounter);
+                if (bValue !== 0) {
+                    this.a[current.value.row][current.value.col] = bValue;
+                }
                 onLoop(it);
             }
         }
@@ -117,7 +122,10 @@ class Array2d {
         const onLoop = (it) => {
             const current = it.next();
             if (!current.done) {
-                this.a[current.value.row][current.value.col] = 0;
+                const bValue = b.get(current.value.rowCounter, current.value.colCounter);
+                if (bValue === 1) {
+                    this.a[current.value.row][current.value.col] = 0;
+                }
                 onLoop(it);
             }
         }

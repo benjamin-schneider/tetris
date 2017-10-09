@@ -11,6 +11,12 @@ const grid = Array2d.create(createGridArray(rows, cols, fillWith));
 const viewGrid = Array2d.create(createGridArray(rows, cols, fillWith));
 const blockT = Array2d.create(blocks.T[0]);
 
+const getRandomBlock = () => {
+    const keys = Object.keys(blocks);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    return blocks[randomKey];
+};
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 describe('Array2d test suite', () => {
@@ -55,14 +61,24 @@ describe('Array2d test suite', () => {
         test(rows, 0, false);
         test(0, cols, false);
 
+
+        const g = Array2d.create([
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0],
+            [0, 1, 0, 0, 0],
+        ]);
+        // const b = Array2d.create(blocks.T[0]); //getRandomBlock()[0]
+        // console.log( '-------' );
+        // console.log( g.canMerge(b, 2, 0) );
+        //console.log( g.merge(b, 2, 0) );
+        console.log( g.a );
         
-        const getRandomBlock = () => {
-            const keys = Object.keys(blocks);
-            const randomKey = keys[Math.floor(Math.random() * keys.length)];
-            return blocks[randomKey];
-        };
+        
         const loop = (row, col) => {
-            const block = Array2d.create(getRandomBlock()[0]); 
+            //const block = Array2d.create(blocks.T[0]); //getRandomBlock()[0]
+            const block = Array2d.create(getRandomBlock()[0]);
             const framesInterval = setInterval(() => {
                 const canMergeResult = grid.canMerge(block, row, col);
                 if (canMergeResult.success) {
@@ -79,14 +95,15 @@ describe('Array2d test suite', () => {
                     clearInterval(framesInterval); 
                     
                 }    
-            }, 100);
+            }, 75);
         };
 
         setTimeout(() => loop(0, 0), 0);  
-        setTimeout(() => loop(0, 5), 2000);
-        setTimeout(() => loop(0, 2), 4000);
-
+        setTimeout(() => loop(0, 3), 1000);
+        setTimeout(() => loop(0, 2), 2000);
+        setTimeout(() => loop(0, 5), 3000);
         setTimeout(() => done(), 9000);
+        
         
 
     });
