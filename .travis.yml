@@ -6,6 +6,6 @@ install:
 cache:
   directories:
     - "node_modules"
-  script
-    - npm run test
-    - npm run err
+script:
+  - npm run test
+  - npm run err
