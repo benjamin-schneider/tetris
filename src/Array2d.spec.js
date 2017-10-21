@@ -50,7 +50,7 @@ describe('Array2d test suite', () => {
         test(0, cols - 1, { row: 1, col: 0, type: 'row' });
     });
 
-    it('shoud detect if merging is possble', (done) => {
+    it('shoud detect if merging is possble', () => {
         const test = (row, col, result) => {
             const canMergeResult = grid.canMerge(blockT, row, col);
             expect(canMergeResult.success).toEqual(result);
@@ -72,10 +72,10 @@ describe('Array2d test suite', () => {
         // const b = Array2d.create(blocks.T[0]); //getRandomBlock()[0]
         // console.log( '-------' );
         // console.log( g.canMerge(b, 2, 0) );
-        //console.log( g.merge(b, 2, 0) );
-        console.log( g.a );
+        // console.log( g.merge(b, 2, 0) );
+        // console.log( g.a );
         
-        
+        /*
         const loop = (row, col) => {
             //const block = Array2d.create(blocks.T[0]); //getRandomBlock()[0]
             const block = Array2d.create(getRandomBlock()[0]);
@@ -83,7 +83,7 @@ describe('Array2d test suite', () => {
                 const canMergeResult = grid.canMerge(block, row, col);
                 if (canMergeResult.success) {
                     if (row > 0) {
-                        viewGrid.unmerge(block, row - 1, col);    
+                        viewGrid.unmerge(block, row - 1, col);
                     }
                     viewGrid.merge(block, row, col);
                     console.log(viewGrid.a);
@@ -92,17 +92,31 @@ describe('Array2d test suite', () => {
                     grid.merge(block, row - 1, col);
                     viewGrid.merge(block, row - 1, col);
                     console.log(grid.a);
-                    clearInterval(framesInterval); 
+                    clearInterval(framesInterval);
+                    done(); 
                     
                 }    
             }, 75);
         };
+        */
+        
+        //loop(20, 10);
 
-        setTimeout(() => loop(0, 0), 0);  
-        setTimeout(() => loop(0, 3), 1000);
-        setTimeout(() => loop(0, 2), 2000);
-        setTimeout(() => loop(0, 5), 3000);
-        setTimeout(() => done(), 9000);
+        
+        // const loopGrid = (it) => {
+        //     const current = it.next();
+        //     if (!current.done) {
+        //         console.log(current);
+        //         loopGrid(it);
+        //     }
+        // };
+        // loopGrid(grid.loop());
+
+        // console.log( [...grid.loop()].map );
+
+
+
+        
         
         
 
@@ -116,18 +130,5 @@ describe('Array2d test suite', () => {
     it('shoud unmerge', () => {
         grid.unmerge(Array2d.create(blocks.I[0]), 0, 0);
         expect(grid.a[0]).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-
-        // const it = grid.loopBlock(Array2d.create(blocks.I[0]), 0, 0);
-        // console.log(it);
-        // console.log(it.next())
-        // console.log(it.next())
-        // console.log(it.next());
-        // console.log(it.next());
-        // console.log(it.next());
-        // console.log(it.next());
-        // console.log(it.next());
-        // console.log(it.next());
-        
     });
-
 });

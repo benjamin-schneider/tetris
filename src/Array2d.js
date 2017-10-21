@@ -85,6 +85,19 @@ class Array2d {
         return { success: false };
     }
 
+    * loop() {
+        let [row, col, next] = [0, 0, ];
+        do {
+            yield { col, row };
+            if (!this.hasNext(row, col)) {
+                return { value: undefined, done: true };
+            }
+            next = this.getNext(row, col);
+            row = next.row;
+            col = next.col;
+        } while (!next.done);
+    }
+
     * loopBlock(b, row, col) {
         const startCol = col;
         let rowCounter = 0;
@@ -115,6 +128,10 @@ class Array2d {
             }
         }
         onLoop(this.loopBlock(b, row, col));
+
+        // [...this.loop()].forEach((value, key) => {
+        //     console.log(value);
+        // });
     }
 
 
@@ -128,8 +145,8 @@ class Array2d {
                 }
                 onLoop(it);
             }
-        }
-        onLoop(this.loopBlock(b, row, col));        
+        };
+        onLoop(this.loopBlock(b, row, col));  
     }
 
     // merge(b, row, col) {
