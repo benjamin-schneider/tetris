@@ -2,23 +2,18 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 // import logo from './logo.svg';
 import './App.css';
-import blocks from './blocks';
+import { getRandomBlock, getNextOrientedBlock } from './blocks';
 import Array2d from './Array2d';
 import Grid from './Grid';
 
-const getRandomBlock = () => {
-    const keys = Object.keys(blocks);
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    const randomOrientation = Math.floor(Math.random() * blocks[randomKey].length);
-    return blocks[randomKey][randomOrientation];
-};
 const createGridArray = (rows, cols, fillWith = 0) =>
     Array(rows).fill(fillWith).map(() => Array(cols).fill(fillWith));
 
 class App extends Component {
     constructor(props) {
         super(props);
-        const block = Array2d.create(getRandomBlock());
+        const randomBlock = getRandomBlock();
+        const block = Array2d.create(randomBlock.orientedBlock);
         const viewGrid = Array2d.create(createGridArray(props.rows, props.cols));
         viewGrid.merge(block, 0, 0);
         this.state = {
@@ -28,51 +23,75 @@ class App extends Component {
             viewGrid,
             direction: null,
             block,
+            randomBlock,
         };
     }
 
     componentDidMount() {
         global.document.addEventListener('keydown', this.onKeyDownHandler.bind(this));
-        setInterval(() => this.moveDown(), 1000);
+        setInterval(() => this.move('down'), 400);
     }
 
     onKeyDownHandler(event) {
-        event.preventDefault();
-        const { key } = event;
-        switch (key) {
-            case 'ArrowLeft' : this.moveLeft(); break;
-            case 'ArrowRight' : this.moveRight(); break;
+        const { code } = event;
+        switch (code) {
+            case 'Space' : this.rotate(); break;
+            case 'ArrowLeft' : this.move('left'); break;
+            case 'ArrowRight' : this.move('right'); break;
+            case 'ArrowDown' : this.move('down'); break;
             default : break;
         }
+        event.preventDefault();
     }
 
-    moveDown() {
-        const { block, col, row, viewGrid } = this.state;
-        viewGrid.unmerge(block, row, col);
-        const canMergeResult = viewGrid.canMerge(block, row + 1, col);
+    rotate() {
+        const { col, block, grid, randomBlock, row, viewGrid } = this.state;
+        const nextOrientedBlock = getNextOrientedBlock(randomBlock);
+        const canMergeResult = grid.canMerge(Array2d.create(nextOrientedBlock.orientedBlock), row, col);
         if (canMergeResult.success) {
-            viewGrid.merge(block, row + 1, col);
-            this.setState({ row: row + 1, viewGrid });
+            viewGrid.unmerge(block, row, col);
+            this.setState({
+                randomBlock: nextOrientedBlock,
+                block: Array2d.create(nextOrientedBlock.orientedBlock),
+            });
         }
     }
 
-    moveLeft() {
-        const { block, col, row, viewGrid } = this.state;
-        viewGrid.unmerge(block, row, col);
-        const canMergeResult = viewGrid.canMerge(block, row, col - 1);
-        if (canMergeResult.success) {
-            viewGrid.merge(block, row, col - 1);
-            this.setState({ col: col - 1, viewGrid });
-        }
-    }
-
-    moveRight() {
-        const { block, col, row, viewGrid } = this.state;
-        viewGrid.unmerge(block, row, col);
-        const canMergeResult = viewGrid.canMerge(block, row, col + 1);
-        if (canMergeResult.success) {
-            viewGrid.merge(block, row, col + 1);
-            this.setState({ col: col + 1, viewGrid });
+    move(direction) {
+        const { block, col, grid, row, viewGrid } = this.state;
+        const tryToMove = (mergeParams, nextState) => {
+            viewGrid.unmerge(block, row, col);
+            const canMergeResult = grid.canMerge(...mergeParams);
+            if (canMergeResult.success) {
+                viewGrid.merge(...mergeParams);
+                this.setState(nextState);
+            } else if (direction === 'down') {
+                const lastRowMergeParams = [...mergeParams];
+                lastRowMergeParams[1] -= 1;
+                grid.merge(...lastRowMergeParams);
+                const randomBlock = getRandomBlock();
+                const newBlock = Array2d.create(randomBlock.orientedBlock);
+                this.setState({
+                    row: 0,
+                    col: 0,
+                    block: newBlock,
+                    grid,
+                    viewGrid,
+                    randomBlock,
+                });
+            }
+        };
+        switch (direction) {
+            case 'down' :
+                tryToMove([block, row + 1, col], { row: row + 1, viewGrid });
+                break;
+            case 'left' :
+                tryToMove([block, row, col - 1], { col: col - 1, viewGrid });
+                break;
+            case 'right' : 
+                tryToMove([block, row, col + 1], { col: col + 1, viewGrid });
+                break;
+            default : break;
         }
     }
 
@@ -80,7 +99,8 @@ class App extends Component {
         const { col, row } = this.state;
         return (
             <div className="game" role="presentation">
-                <Grid grid={this.state.viewGrid} key={`${row}x${col}`} />
+                <Grid className="grid--game" grid={this.state.grid} key={`grid${row}x${col}`} />
+                <Grid className="grid--current-block" grid={this.state.viewGrid} key={`viewGrid${row}x${col}`} />                
             </div>
         );
     }
