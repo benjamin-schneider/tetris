@@ -64,60 +64,30 @@ describe('Array2d test suite', () => {
 
         const g = Array2d.create([
             [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [1, 1, 1, 0, 0],
+            [1, 1, 0, 0, 0],
+            [1, 1, 0, 0, 0],
             [0, 1, 0, 0, 0],
+            [1, 1, 1, 0, 0],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [0, 1, 1, 1, 0],
         ]);
-        // const b = Array2d.create(blocks.T[0]); //getRandomBlock()[0]
-        // console.log( '-------' );
-        // console.log( g.canMerge(b, 2, 0) );
-        // console.log( g.merge(b, 2, 0) );
-        // console.log( g.a );
-        
-        /*
-        const loop = (row, col) => {
-            //const block = Array2d.create(blocks.T[0]); //getRandomBlock()[0]
-            const block = Array2d.create(getRandomBlock()[0]);
-            const framesInterval = setInterval(() => {
-                const canMergeResult = grid.canMerge(block, row, col);
-                if (canMergeResult.success) {
-                    if (row > 0) {
-                        viewGrid.unmerge(block, row - 1, col);
-                    }
-                    viewGrid.merge(block, row, col);
-                    console.log(viewGrid.a);
-                    row++;
-                } else {
-                    grid.merge(block, row - 1, col);
-                    viewGrid.merge(block, row - 1, col);
-                    console.log(grid.a);
-                    clearInterval(framesInterval);
-                    done(); 
-                    
-                }    
-            }, 75);
+
+
+        const clearLines = () => {
+            const clearedLines = Array2d.create(g.a.filter(row => !row.every(col => col === 1)));
+            while (clearedLines.getRowLength() !== g.getRowLength()) {
+                clearedLines.a.unshift(Array(g.getColLength()).fill(0));    
+            }
+            return clearedLines;
         };
-        */
-        
-        //loop(20, 10);
 
-        
-        // const loopGrid = (it) => {
-        //     const current = it.next();
-        //     if (!current.done) {
-        //         console.log(current);
-        //         loopGrid(it);
-        //     }
-        // };
-        // loopGrid(grid.loop());
+        const handleGravity = (a) => {
+            
+            return a;
+        };
 
-        // console.log( [...grid.loop()].map );
-
-
-
-        
-        
+        console.log(handleGravity(clearLines()));
         
 
     });

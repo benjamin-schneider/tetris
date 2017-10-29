@@ -53,6 +53,7 @@ class App extends Component {
             this.setState({
                 randomBlock: nextOrientedBlock,
                 block: Array2d.create(nextOrientedBlock.orientedBlock),
+                viewGrid,
             });
         }
     }
@@ -71,14 +72,24 @@ class App extends Component {
                 grid.merge(...lastRowMergeParams);
                 const randomBlock = getRandomBlock();
                 const newBlock = Array2d.create(randomBlock.orientedBlock);
-                this.setState({
+                const state = {
                     row: 0,
                     col: 0,
                     block: newBlock,
                     grid,
                     viewGrid,
                     randomBlock,
-                });
+                };
+
+                const clearedLines = Array2d.create(this.state.grid.a.filter(row => !row.every(col => col === 1)));
+                if (clearedLines.getRowLength() !== this.state.grid.getRowLength()) {
+                    while (clearedLines.getRowLength() !== this.state.grid.getRowLength()) {
+                        clearedLines.a.unshift(Array(this.state.grid.getColLength()).fill(0));
+                    }
+                    state.grid = clearedLines;
+                }
+
+                this.setState(state);
             }
         };
         switch (direction) {
@@ -100,7 +111,8 @@ class App extends Component {
         return (
             <div className="game" role="presentation">
                 <Grid className="grid--game" grid={this.state.grid} key={`grid${row}x${col}`} />
-                <Grid className="grid--current-block" grid={this.state.viewGrid} key={`viewGrid${row}x${col}`} />                
+                <Grid className="grid--current-block" grid={this.state.viewGrid} key={`viewGrid${row}x${col}`} />
+                <Grid className="grid--next-block" grid={Array2d.create(this.state.randomBlock.orientedBlock)} key={`nextBlock${row}x${col}`} />
             </div>
         );
     }

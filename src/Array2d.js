@@ -128,10 +128,6 @@ class Array2d {
             }
         }
         onLoop(this.loopBlock(b, row, col));
-
-        // [...this.loop()].forEach((value, key) => {
-        //     console.log(value);
-        // });
     }
 
 
@@ -148,6 +144,8 @@ class Array2d {
         };
         onLoop(this.loopBlock(b, row, col));  
     }
+
+    
 
     // merge(b, row, col) {
     //     const startCol = col;

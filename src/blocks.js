@@ -72,7 +72,7 @@ export const getRandomBlock = () => {
 };
 
 export const getNextOrientedBlock = (randomBlock) => {
-    const { block, orientedBlock, randomOrientation } = randomBlock;
+    const { block, randomOrientation } = randomBlock;
     const blockLength = block.length;
     if (randomOrientation + 1 < blockLength) {
         return {
