@@ -17,7 +17,7 @@ class Grid extends React.PureComponent {
                     grid.a.map(row => row.map((value, key) => (
                         <div
                             key={key}
-                            className="grid__element"
+                            className={`grid__element ${value !== 0 ? 'grid-element--visible' : ''}`}
                             style={{ backgroundColor: value !== 0 ? value.color : defaultColor }}
                         />
                     )))

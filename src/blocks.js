@@ -101,13 +101,16 @@ const blocks = {
 };
 
 const colors = [
-    'red',
-    'green',
-    'blue',
-    'yellow',
-    'orange',
-    'black',
-    'pink',
+    'rgba(36, 123, 160, 1)',
+    'rgba(112, 193, 179, 1)',
+    'rgba(178, 219, 191, 1)',
+    'rgba(243, 255, 189, 1)',
+    'rgba(255, 22, 84, 1)',
+    'rgba(80, 81, 79, 1)',
+    'rgba(242, 95, 92, 1)',
+    'rgba(255, 224, 102, 1)',
+    'rgba(36, 123, 160, 1)',
+    'rgba(112, 193, 179, 1)',
 ];
 
 export const getRandomBlock = () => {
