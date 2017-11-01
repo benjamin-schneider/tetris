@@ -1,4 +1,3 @@
-
 import blocks from './blocks';
 import Array2d from './Array2d';
 // npm test -- src/Array2d.spec.js
@@ -16,7 +15,7 @@ const getRandomBlock = () => {
     const randomKey = keys[Math.floor(Math.random() * keys.length)];
     return blocks[randomKey];
 };
-
+/* global jasmine */
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 describe('Array2d test suite', () => {
@@ -53,7 +52,7 @@ describe('Array2d test suite', () => {
     it('shoud detect if merging is possble', () => {
         const test = (row, col, result) => {
             const canMergeResult = grid.canMerge(blockT, row, col);
-            expect(canMergeResult.success).toEqual(result);
+            expect(canMergeResult).toEqual(result);
         };
         test(0, 0, true);
         test(rows - blockT.getRowLength(), 0, true);
@@ -63,41 +62,37 @@ describe('Array2d test suite', () => {
 
 
         const g = Array2d.create([
-            [0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 0],
-            [1, 1, 0, 0, 0],
-            [0, 1, 0, 0, 0],
-            [1, 1, 1, 0, 0],
-            [1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1],
-            [0, 1, 1, 1, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [1, 1, 1, 0],
         ]);
 
+        const b = Array2d.create([
+            [0, 1],
+            [1, 1],
+            [0, 1],
+        ]);
+        //console.log( g.canMerge(b, 2, 2) );
 
-        const clearLines = () => {
-            const clearedLines = Array2d.create(g.a.filter(row => !row.every(col => col === 1)));
-            while (clearedLines.getRowLength() !== g.getRowLength()) {
-                clearedLines.a.unshift(Array(g.getColLength()).fill(0));    
-            }
-            return clearedLines;
+        const canMerge = (block, parentRow, parentCol) => {
+            return block.a.filter((blockRowValue, blockRowKey) => !blockRowValue.every((blockColValue, blockColKey) => {
+                const gridRowKey = parentRow + blockRowKey;
+                const gridColKey = parentCol + blockColKey;
+                return blockColValue === 0 || (g.has(gridRowKey, gridColKey) && g.get(gridRowKey, gridColKey) === 0);
+            })).length === 0;
         };
-
-        const handleGravity = (a) => {
-            
-            return a;
-        };
-
-        console.log(handleGravity(clearLines()));
-        
+        //console.log( canMerge(b, 2, 2) );
 
     });
 
-    it('shoud merge', () => {
+    it('should merge', () => {
         grid.merge(Array2d.create(blocks.I[0]), 0, 0);
         expect(grid.a[0]).toEqual([1, 1, 1, 1, 0, 0, 0, 0, 0, 0]);
     });
 
-    it('shoud unmerge', () => {
+    it('should unmerge', () => {
         grid.unmerge(Array2d.create(blocks.I[0]), 0, 0);
         expect(grid.a[0]).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     });

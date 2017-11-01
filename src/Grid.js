@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Array2d from './Array2d';
+
 class Grid extends React.PureComponent {
     render() {        
-        const { className, grid } = this.props;
+        const { className, defaultColor, grid } = this.props;
         const style = {
             display: 'grid',
             gridTemplateRows: `repeat(${grid.getRowLength()}, 1fr)`,
@@ -12,12 +13,14 @@ class Grid extends React.PureComponent {
         return (
             <div className={`grid ${className}`} style={style}>
                 {
-                    Array.prototype.concat(...grid.a).map((value, key) => (
+                    //perf? Array.prototype.concat(...grid.a).map((value, key) => (
+                    grid.a.map(row => row.map((value, key) => (
                         <div
+                            key={key}
                             className="grid__element"
-                            style={{ backgroundColor: value === 1 ? 'gray' : 'transparent' }}
+                            style={{ backgroundColor: value !== 0 ? value.color : defaultColor }}
                         />
-                    ))
+                    )))
                 }
             </div>
         );
@@ -26,11 +29,13 @@ class Grid extends React.PureComponent {
 
 Grid.propTypes = {
     className: PropTypes.string,
+    defaultColor: PropTypes.string,
     grid: PropTypes.instanceOf(Array2d),
 };
 
 Grid.defaultProps = {
     className: '',
+    defaultColor: 'transparent',
     grid: Array2d.create([[]]),
 };
 

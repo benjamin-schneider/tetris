@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-// import logo from './logo.svg';
+
 import './App.css';
 import { getRandomBlock, getNextOrientedBlock } from './blocks';
 import Array2d from './Array2d';
@@ -12,24 +12,25 @@ const createGridArray = (rows, cols, fillWith = 0) =>
 class App extends Component {
     constructor(props) {
         super(props);
-        const randomBlock = getRandomBlock();
-        const block = Array2d.create(randomBlock.orientedBlock);
+        const block = getRandomBlock();
         const viewGrid = Array2d.create(createGridArray(props.rows, props.cols));
-        viewGrid.merge(block, 0, 0);
+        this.gameInterval = null;
+        const col = Math.floor(props.cols / 2 - block.orientedBlock[0].length / 2);
+        viewGrid.merge(Array2d.create(block.orientedBlock), 0, col);
         this.state = {
             row: 0,
-            col: 0,
+            col,
             grid: Array2d.create(createGridArray(props.rows, props.cols)),
             viewGrid,
             direction: null,
             block,
-            randomBlock,
+            nextBlock: getRandomBlock(),
         };
     }
 
     componentDidMount() {
         global.document.addEventListener('keydown', this.onKeyDownHandler.bind(this));
-        setInterval(() => this.move('down'), 400);
+        this.gameInterval = setInterval(() => this.move('down'), 400);
     }
 
     onKeyDownHandler(event) {
@@ -45,14 +46,13 @@ class App extends Component {
     }
 
     rotate() {
-        const { col, block, grid, randomBlock, row, viewGrid } = this.state;
-        const nextOrientedBlock = getNextOrientedBlock(randomBlock);
+        const { col, block, grid, row, viewGrid } = this.state;
+        const nextOrientedBlock = getNextOrientedBlock(block);
         const canMergeResult = grid.canMerge(Array2d.create(nextOrientedBlock.orientedBlock), row, col);
-        if (canMergeResult.success) {
-            viewGrid.unmerge(block, row, col);
+        if (canMergeResult) {
+            viewGrid.unmerge(Array2d.create(block.orientedBlock), row, col);
             this.setState({
-                randomBlock: nextOrientedBlock,
-                block: Array2d.create(nextOrientedBlock.orientedBlock),
+                block: nextOrientedBlock,
                 viewGrid,
             });
         }
@@ -61,27 +61,29 @@ class App extends Component {
     move(direction) {
         const { block, col, grid, row, viewGrid } = this.state;
         const tryToMove = (mergeParams, nextState) => {
-            viewGrid.unmerge(block, row, col);
+            viewGrid.unmerge(Array2d.create(block.orientedBlock), row, col);
             const canMergeResult = grid.canMerge(...mergeParams);
-            if (canMergeResult.success) {
+            if (canMergeResult) {
                 viewGrid.merge(...mergeParams);
                 this.setState(nextState);
             } else if (direction === 'down') {
+                if (row === 0 && !canMergeResult) {
+                    clearInterval(this.gameInterval);
+                    return;
+                }
                 const lastRowMergeParams = [...mergeParams];
                 lastRowMergeParams[1] -= 1;
                 grid.merge(...lastRowMergeParams);
-                const randomBlock = getRandomBlock();
-                const newBlock = Array2d.create(randomBlock.orientedBlock);
+                const centerCol = Math.floor(this.props.cols / 2 - this.state.nextBlock.orientedBlock[0].length / 2);
                 const state = {
                     row: 0,
-                    col: 0,
-                    block: newBlock,
+                    col: centerCol,
+                    block: this.state.nextBlock,
+                    nextBlock: getRandomBlock(),
                     grid,
                     viewGrid,
-                    randomBlock,
                 };
-
-                const clearedLines = Array2d.create(this.state.grid.a.filter(row => !row.every(col => col === 1)));
+                const clearedLines = Array2d.create(this.state.grid.a.filter(row => !row.every(col => col !== 0)));
                 if (clearedLines.getRowLength() !== this.state.grid.getRowLength()) {
                     while (clearedLines.getRowLength() !== this.state.grid.getRowLength()) {
                         clearedLines.a.unshift(Array(this.state.grid.getColLength()).fill(0));
@@ -94,13 +96,13 @@ class App extends Component {
         };
         switch (direction) {
             case 'down' :
-                tryToMove([block, row + 1, col], { row: row + 1, viewGrid });
+                tryToMove([Array2d.create(block.orientedBlock), row + 1, col], { row: row + 1, viewGrid });
                 break;
             case 'left' :
-                tryToMove([block, row, col - 1], { col: col - 1, viewGrid });
+                tryToMove([Array2d.create(block.orientedBlock), row, col - 1], { col: col - 1, viewGrid });
                 break;
             case 'right' : 
-                tryToMove([block, row, col + 1], { col: col + 1, viewGrid });
+                tryToMove([Array2d.create(block.orientedBlock), row, col + 1], { col: col + 1, viewGrid });
                 break;
             default : break;
         }
@@ -111,8 +113,8 @@ class App extends Component {
         return (
             <div className="game" role="presentation">
                 <Grid className="grid--game" grid={this.state.grid} key={`grid${row}x${col}`} />
-                <Grid className="grid--current-block" grid={this.state.viewGrid} key={`viewGrid${row}x${col}`} />
-                <Grid className="grid--next-block" grid={Array2d.create(this.state.randomBlock.orientedBlock)} key={`nextBlock${row}x${col}`} />
+                <Grid className="grid--current-block" color={this.state.block.color} grid={this.state.viewGrid} key={`viewGrid${row}x${col}`} />
+                <Grid className="grid--next-block"grid={Array2d.create(this.state.nextBlock.orientedBlock)} key={`nextBlock${row}x${col}`} />
             </div>
         );
     }

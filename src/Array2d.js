@@ -46,43 +46,12 @@ class Array2d {
         return rowCol;
     }
 
-    canMerge(b, row, col, bRow = 0, bCol = 0, initialRowCol = {}) {
-        if (this.has(row, col) && (this.get(row, col) === 0 || b.get(bRow, bCol) === 0)) {
-            if ('row' in initialRowCol === false && 'col' in initialRowCol === false) {
-                Object.assign(initialRowCol, { row, col });
-            }
-            if (!b.hasNext(bRow, bCol)) {
-                return {
-                    initialRowCol,
-                    success: true,
-                };
-            }
-            const next = this.getNext(row, col);
-            const nextB = b.getNext(bRow, bCol);
-            if (!next.hasNext) {
-                return { success: false };
-            }
-            if (next.type === 'row' && nextB.type === 'col') {
-                return { success: false };
-            }
-            if (nextB.type === 'row') {
-                //console.log('INITIAL: ', initialRowCol, 'NEXT: ', next, 'NEXTB: ', nextB, this.get(next.row, initialRowCol.col));
-                if (!this.has(row + 1, initialRowCol.col) || this.get(next.row, initialRowCol.col) !== 0) {
-                    return { success: false };
-                }
-                next.row = row + 1;
-                next.col = initialRowCol.col;
-            }        
-            return this.canMerge(
-                b,
-                next.row,
-                next.col,
-                nextB.row,
-                nextB.col,
-                initialRowCol,
-            );
-        }
-        return { success: false };
+    canMerge(b, row, col) {
+        return b.a.filter((blockRowValue, blockRowKey) => !blockRowValue.every((blockColValue, blockColKey) => {
+            const gridRowKey = row + blockRowKey;
+            const gridColKey = col + blockColKey;
+            return blockColValue === 0 || (this.has(gridRowKey, gridColKey) && this.get(gridRowKey, gridColKey) === 0);
+        })).length === 0;
     }
 
     * loop() {
@@ -126,7 +95,7 @@ class Array2d {
                 }
                 onLoop(it);
             }
-        }
+        };
         onLoop(this.loopBlock(b, row, col));
     }
 
@@ -136,7 +105,7 @@ class Array2d {
             const current = it.next();
             if (!current.done) {
                 const bValue = b.get(current.value.rowCounter, current.value.colCounter);
-                if (bValue === 1) {
+                if (bValue !== 0) {
                     this.a[current.value.row][current.value.col] = 0;
                 }
                 onLoop(it);
